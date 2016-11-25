@@ -170,12 +170,15 @@ Timestamp of the message. Defaults to **true**.\nUsing `|d|` removes timestamp."
             for(var i = 0; i < params.length; i++){
                 p = params[i];
                 c = p.split("^");
+                if(p == '') continue;
                 console.log(c)
-                baseContent = baseContent.replace(c[0],c[1])
+                baseContent = baseContent.replaceAll(c[0],c[1])
             }
+            baseContent = baseContent.trim();
             console.log(baseContent);
             params = baseContent.split("|").slice(1);
             blocks = baseContent.split(" ").slice(1);
+            command = baseContent.split(" ")[0].replace(prefix,"");
         } else {
             baseContent = message.content;
         }
@@ -194,13 +197,14 @@ Timestamp of the message. Defaults to **true**.\nUsing `|d|` removes timestamp."
             var color;
             var user = false;
             if(message.guild != null){
-                console.log(blocks[0])
+                //console.log(blocks[0])
                 if(m){
+                    console.log("----mimic----")
                     user = message.guild.members.filter(m => m.user.username === blocks[0]);
                 } else {
                     user = message.guild.members.filter(m => m.user.username === message.author.username);
                 }
-                console.log(user);
+                //console.log(user);
                 color = user.array()[0].highestRole.hexColor.replace("#","");
             }
             var image = false;
@@ -293,3 +297,9 @@ function embedMessage(client, msg, params){
 
     msg.channel.sendMessage('', { embed });
 }
+
+
+String.prototype.replaceAll = function(search, replacement) {
+    var target = this;
+    return target.split(search).join(replacement);
+};
