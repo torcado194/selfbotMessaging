@@ -2,6 +2,7 @@ const Discord = require('discord.js');
 
 const bot = new Discord.Client();
 
+const token = require('./token.json').token;
 
 bot.on('ready', () => {
     console.log('I am ready!');
