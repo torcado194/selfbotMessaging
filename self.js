@@ -37,7 +37,7 @@ bot.on("message", message => {
             value: "```css\n\
 |color^FF0000|\n|c^FF0000|\n\
 ```\n\
-Sets color of left border. If no color is specified, uses the user's role color\n\
+Sets color of left border. Defaults user's **role color**\n\
 \n\
 ```css\n\
 |title^Hello|\n|t^Hello|\n\
@@ -48,6 +48,11 @@ Main message title.\n\
 |link^http://google.com|\n|l^http://google.com|\n\
 ```\n\
 Link for title and author name.\n\
+\n\
+```css\n\
+|author|\n|a|\n\
+```\n\
+Author avatar and name. Defaults to *user avatar* and *username*.\nUsing `|a|` removes author.\n\
 \n\
 ```css\n\
 |message^Message body.|\n|m^Message Body.|\n\
@@ -62,22 +67,32 @@ A field block. 'inline' is optional, defaults to **false**.\n\
 ```css\n\
 |image^http://i.imgur.com/Z0uH4jE.jpg|\n|i^http://i.imgur.com/Z0uH4jE.jpg|\n\
 ```\n\
-Main image for message. Inline images can be added using Markdown.\n\
-\n\
+Main image for message. Inline images can be added using Markdown."
+            },
+            {
+                name: "**͘ **",
+                value: "\
 ```css\n\
 |padding|\n|p|\n\
 ```\n\
 Add spacing between message and footer. Defaults to **false**.\n\
 \n\
 ```css\n\
-|footer^Footer message.^icon.png|\n|o^Footer message.|\n\
+|signature^Footer message.^icon.png|\n|s^Footer message.|\n\
 ```\n\
-The footer icon and message. Defaults to **[user avatar ©username]**.\nIcon tag is optional, defaults to **user avatar**.\n\
+The footer icon and message. Defaults to **[user avatar ©username]**.\nIcon tag is optional, defaults to **user avatar**.\nUsing `|s|` removes signature.\n\
 \n\
 ```css\n\
-|time^false|\n|date^false|\n|d^false|\n\
+|date|\n|d|\n\
 ```\n\
-Timestamp of the message. Defaults to **true**."
+Timestamp of the message. Defaults to **true**.\nUsing `|d|` removes timestamp."
+            },
+            {
+                name: "Example",
+                value: "\
+```css\n\
+!f |c^0000DD|m^Hello!!|i^http://i.imgur.com/o8xQlCM.jpg|s|d\n\
+```"
             }
         ];
         embedMessage(bot, message, {author: author, title: title, link: link, color: color, content: content, fields: fields, image: image});
@@ -109,6 +124,9 @@ Timestamp of the message. Defaults to **true**."
             for(var i = 0; i < params.length; i++){
                 p = params[i];
                 c = p.split("^");
+                if(params[i].startsWith("a") || params[i].startsWith("author")){
+                    author = false;
+                }
                 if(params[i].startsWith("t") || params[i].startsWith("title")){
                     title = c[1];
                 }
@@ -130,10 +148,10 @@ Timestamp of the message. Defaults to **true**."
                 if(params[i].startsWith("i") || params[i].startsWith("image")){
                     image = c[1];
                 }
-                if(params[i].startsWith("d") || params[i].startsWith("date") || params[i].startsWith("time")){
-                    timestamp = c[1] == "false" ? false : true;
+                if(params[i].startsWith("d") || params[i].startsWith("date")){
+                    timestamp = c[1] == null ? false : true;
                 }
-                if(params[i].startsWith("o") || params[i].startsWith("footer")){
+                if(params[i].startsWith("s") || params[i].startsWith("signature")){
                     footer = c[1] == null ? false : {text: c[1], icon_url: (c[2] == null ? false : c[2])};
                 }
             }
