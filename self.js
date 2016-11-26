@@ -199,8 +199,9 @@ Any character or string of characters can be used for placeholders.\
         }
     }
     if(command == "d"){
-        let messagecount = 0;
-        message.channel.fetchMessages({limit: 100})
+        let messagecount = Number(blocks[0]);
+        console.log(messagecount)
+        message.channel.fetchMessages({limit: 8})
             .then(messages => {
             let msg_array = messages.array();
             msg_array = msg_array.filter(m => m.author.id === bot.user.id);
