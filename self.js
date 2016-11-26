@@ -189,11 +189,37 @@ Any character or string of characters can be used for placeholders.\
         store.set(blocks[0], message.content.split(' ').slice(2).join(' '));
     }
     if(command == "t"){
-        console.log(blocks[0])
-        console.log(blocks[1])
-        store.get(blocks[0], message.content.split(' ').slice(2).join(' '));
+        if(blocks[0] == "?"){
+            if(blocks[1] == null){
+                message.channel.sendMessage("```JSON\n" + JSON.stringify(store.data) + "\n```");
+            } else {
+                message.channel.sendMessage("`" + store.get(message.content.split(' ').slice(2).join(' ')) + "`");
+            }
+            return;
+        }
+    }
+    if(command == "d"){
+        let messagecount = 0;
+        message.channel.fetchMessages({limit: 100})
+            .then(messages => {
+            let msg_array = messages.array();
+            msg_array = msg_array.filter(m => m.author.id === bot.user.id);
+            msg_array.length = messagecount + 1;
+            msg_array.map(m => m.delete().catch(console.error));
+        });
     }
     if(command == "f" || command == "m" || command == "t" || command == "k") {
+        let messagecount = 0;
+        if(command != "k"){
+            message.channel.fetchMessages({limit: 100})
+                .then(messages => {
+                let msg_array = messages.array();
+                msg_array = msg_array.filter(m => m.author.id === bot.user.id);
+                msg_array.length = messagecount + 1;
+                msg_array.map(m => m.delete().catch(console.error));
+            });
+        }
+        
         var baseContent = "";
         var p, c;
         if(command == "t"){
@@ -214,16 +240,6 @@ Any character or string of characters can be used for placeholders.\
             command = baseContent.split(" ")[0].replace(prefix,"");
         } else {
             baseContent = message.content;
-        }
-        let messagecount = 0;
-        if(command != "k"){
-            message.channel.fetchMessages({limit: 100})
-                .then(messages => {
-                let msg_array = messages.array();
-                msg_array = msg_array.filter(m => m.author.id === bot.user.id);
-                msg_array.length = messagecount + 1;
-                msg_array.map(m => m.delete().catch(console.error));
-            });
         }
         if(params[0] != null){
             var m = (command == "m");
