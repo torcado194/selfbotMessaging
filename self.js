@@ -29,7 +29,8 @@ bot.on("message", message => {
             syntax: false,
             tags: false,
             examples: false,
-            commands: false
+            commands: false,
+            saving: false
         }
         
         var color = "EEEB22";
@@ -55,6 +56,7 @@ bot.on("message", message => {
                 helps.tags = true;
                 helps.examples = true;
                 helps.commands = true;
+                helps.saving = true;
             } else if(helps.hasOwnProperty(blocks[0])){
                 helps[blocks[0]] = true;
             }
@@ -63,8 +65,8 @@ bot.on("message", message => {
                     name: "Syntax:",
                     value: "```css\n\
 !f |color^FF0000|message^Message Body^|\n\
-^tag  ^value        ^data separator\n\
-^tag separator               \n\
+    ^tag  ^value        ^data separator\n\
+                ^tag separator\n\
 ```"
                 } : {},
                 helps.tags ? {
@@ -149,33 +151,64 @@ Timestamp of the message. Defaults to **true**.\nUsing `|d|` removes timestamp."
 ```css\n\
 !k |m^Secrets revealed|d|p\n\
 ```\n\
-**k**eeps the original message, if you want to show someone the message code."
+**k**eeps the original message, if you want to show someone the message code.\n\
+```css\n\
+!s name !f |t^My title is: $|m^My message is: %|\n\
+```\n\
+**s**ave a template for a formatted message.\n\
+```css\n\
+!t name |$^Custom title|%^Custom message|\n\
+```\n\
+Use a saved **t**emplate for message, add custom tags for replacing characters."
+                } : {},
+                helps.saving ? {
+                    name: "Saving templates:",
+                    value: "\
+You can save template formats with custom fields for easy use later. For example:\n\
+```css\n\
+!s bee !f |c^FFFF00|m^According to all known laws of aviation...|i^https://i.ytimg.com/vi/uzcGZ3ZsENE/hqdefault.jpg|s|a|d\n\
+!t bee\n\
+```\n\
+The `!s` command saves a template formatted message, and the `!t` command uses that template in a much more simple command.\n\
+\n\
+A feature of saved templates is custom placeholder tags. For example:\n\
+```css\n\
+!s notice !f |c^FFFF00|t^**IMPORTANT MESSAGE:**|m^%|s|a|d\n\
+!t notice |%^i am really cool\n\
+```\n\
+In this example, a `%` is used as a placeholder tag in the save command. In the template command, a block is used which replaces all instances of a `%` with the text after the separator.\n\
+Any character or string of characters can be used for placeholders.\
+"
                 } : {}
             ];
         }
         fields = fields.filter(value => Object.keys(value).length !== 0);
-        console.log(fields)
         embedMessage(bot, message, {author: author, title: title, link: link, color: color, content: content, fields: fields, image: image});
     }
     if(command == "s"){
+        store.set(blocks[0], message.content.split(' ').slice(2).join(' '));
+    }
+    if(command == "t"){
         console.log(blocks[0])
-        console.log(message.content.substr(message.content.indexOf(" ") + 2));
-        store.set(blocks[0], message.content.substr(message.content.indexOf(" ") + 2))
+        console.log(blocks[1])
+        store.get(blocks[0], message.content.split(' ').slice(2).join(' '));
     }
     if(command == "f" || command == "m" || command == "t" || command == "k") {
-        var baseContent;
+        var baseContent = "";
         var p, c;
         if(command == "t"){
             baseContent = store.get(blocks[0]);
+            if(baseContent == null){
+                console.log("NO STORAGE");
+                return;
+            }
             for(var i = 0; i < params.length; i++){
                 p = params[i];
                 c = p.split("^");
                 if(p == '') continue;
-                console.log(c)
                 baseContent = baseContent.replaceAll(c[0],c[1])
             }
             baseContent = baseContent.trim();
-            console.log(baseContent);
             params = baseContent.split("|").slice(1);
             blocks = baseContent.split(" ").slice(1);
             command = baseContent.split(" ")[0].replace(prefix,"");
@@ -197,14 +230,15 @@ Timestamp of the message. Defaults to **true**.\nUsing `|d|` removes timestamp."
             var color;
             var user = false;
             if(message.guild != null){
-                //console.log(blocks[0])
                 if(m){
                     console.log("----mimic----")
                     user = message.guild.members.filter(m => m.user.username === blocks[0]);
                 } else {
                     user = message.guild.members.filter(m => m.user.username === message.author.username);
                 }
-                //console.log(user);
+                if(user.array()[0] == null){
+                    user = message.guild.members.filter(m => m.user.username === message.author.username)
+                }
                 color = user.array()[0].highestRole.hexColor.replace("#","");
             }
             var image = false;
@@ -249,7 +283,6 @@ Timestamp of the message. Defaults to **true**.\nUsing `|d|` removes timestamp."
                 }
             }
             user = user.array()[0].user;
-            console.log(content)
             embedMessage(bot, message, {user: user, author: author, title: title, link: link, color: color, content: content, fields: fields, image: image, timestamp: timestamp, footer: footer});
         }
         
